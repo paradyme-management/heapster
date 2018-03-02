@@ -1,9 +1,12 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: monitoring-influxdb
   namespace: kube-system
 spec:
+  selector:
+    matchLabels:
+      k8s-app: influxdb
   replicas: 1
   template:
     metadata:
@@ -19,7 +22,33 @@ spec:
           name: influxdb-storage
       volumes:
       - name: influxdb-storage
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: influxdb-storage
+#   volumeClaimTemplates:
+#     - metadata:
+#         name: influxdb-storage
+#         namespace: kube-system
+#         annotations:
+#           volume.beta.kubernetes.io/storage-class: "aws-efs"
+#       spec:
+#         accessModes: [ "ReadWriteOnce" ]
+#         resources:
+#           requests:
+#             storage: 30Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: kube-system
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "aws-efs"
+  name: influxdb-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 40Gi
 ---
 apiVersion: v1
 kind: Service

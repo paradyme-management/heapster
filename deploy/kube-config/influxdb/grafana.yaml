@@ -1,9 +1,13 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: monitoring-grafana
   namespace: kube-system
+
 spec:
+  selector:
+    matchLabels:
+      k8s-app: grafana
   replicas: 1
   template:
     metadata:
@@ -47,7 +51,23 @@ spec:
         hostPath:
           path: /etc/ssl/certs
       - name: grafana-storage
-        emptyDir: {}
+        persistentVolumeClaim:
+          claimName: grafana-storage
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: kube-system
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "aws-efs"
+  name: grafana-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+
 ---
 apiVersion: v1
 kind: Service
@@ -64,7 +84,7 @@ spec:
   # or through a public IP.
   # type: LoadBalancer
   # You could also use NodePort to expose the service at a randomly-generated port
-  # type: NodePort
+  type: NodePort
   ports:
   - port: 80
     targetPort: 3000

@@ -10,6 +10,9 @@ metadata:
   name: heapster
   namespace: kube-system
 spec:
+  selector:
+    matchLabels:
+      k8s-app: heapster
   replicas: 1
   template:
     metadata:
