@@ -24,7 +24,7 @@ spec:
       containers:
       - name: heapster
         image: k8s.gcr.io/heapster-amd64:v1.4.2
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command:
         - /heapster
         - --source=kubernetes:https://kubernetes.default
